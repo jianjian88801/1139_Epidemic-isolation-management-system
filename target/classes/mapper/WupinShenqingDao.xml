@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WupinShenqingDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.wupin_shenqing_uuid_number as wupinShenqingUuidNumber
+        ,a.yonghu_id as yonghuId
+        ,a.wupin_id as wupinId
+        ,a.wupin_shenqing_number as wupinShenqingNumber
+        ,a.wupin_content as wupinContent
+        ,a.wupin_shenqing_yesno_types as wupinShenqingYesnoTypes
+        ,a.wupin_shenqing_yesno_text as wupinShenqingYesnoText
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WupinShenqingView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,wupin.gongyingshang_id as wupinGongyingshangId
+        ,wupin.wupin_name as wupinName
+        ,wupin.wupin_photo as wupinPhoto
+        ,wupin.wupin_types as wupinTypes
+        ,wupin.wupin_kucun_number as wupinKucunNumber
+        ,wupin.wupin_delete as wupinDelete
+        ,wupin.wupin_content as wupinContent
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM wupin_shenqing  a
+        left JOIN wupin wupin ON a.wupin_id = wupin.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.wupinShenqingUuidNumber != '' and params.wupinShenqingUuidNumber != null and params.wupinShenqingUuidNumber != 'null' ">
+                and a.wupin_shenqing_uuid_number like CONCAT('%',#{params.wupinShenqingUuidNumber},'%')
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.wupinId != null and params.wupinId != ''">
+                and (
+                    a.wupin_id = #{params.wupinId}
+                )
+            </if>
+            <if test="params.wupinShenqingNumberStart != null and params.wupinShenqingNumberStart != ''">
+                <![CDATA[  and a.wupin_shenqing_number >= #{params.wupinShenqingNumberStart}   ]]>
+            </if>
+            <if test="params.wupinShenqingNumberEnd != null and params.wupinShenqingNumberEnd != ''">
+                <![CDATA[  and a.wupin_shenqing_number <= #{params.wupinShenqingNumberEnd}   ]]>
+            </if>
+             <if test="params.wupinShenqingNumber != null and params.wupinShenqingNumber != ''">
+                and a.wupin_shenqing_number = #{params.wupinShenqingNumber}
+             </if>
+            <if test=" params.wupinContent != '' and params.wupinContent != null and params.wupinContent != 'null' ">
+                and a.wupin_content like CONCAT('%',#{params.wupinContent},'%')
+            </if>
+            <if test="params.wupinShenqingYesnoTypes != null and params.wupinShenqingYesnoTypes != ''">
+                and a.wupin_shenqing_yesno_types = #{params.wupinShenqingYesnoTypes}
+            </if>
+            <if test=" params.wupinShenqingYesnoText != '' and params.wupinShenqingYesnoText != null and params.wupinShenqingYesnoText != 'null' ">
+                and a.wupin_shenqing_yesno_text like CONCAT('%',#{params.wupinShenqingYesnoText},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断物品的id不为空 -->
+            <if test=" params.wupinIdNotNull != '' and params.wupinIdNotNull != null and params.wupinIdNotNull != 'null' ">
+                and a.wupin_id IS NOT NULL
+            </if>
+            <if test="params.gongyingshangId != null  and params.gongyingshangId != ''">
+                and wupin.gongyingshang_id = #{params.gongyingshangId}
+            </if>
+            <if test=" params.wupinName != '' and params.wupinName != null and params.wupinName != 'null' ">
+                and wupin.wupin_name like CONCAT('%',#{params.wupinName},'%')
+            </if>
+            <if test="params.wupinTypes != null  and params.wupinTypes != ''">
+                and wupin.wupin_types = #{params.wupinTypes}
+            </if>
+
+            <if test="params.wupinKucunNumberStart != null  and params.wupinKucunNumberStart != '' ">
+                <![CDATA[  and wupin.wupin_kucun_number >= #{params.wupinKucunNumberStart}   ]]>
+            </if>
+            <if test="params.wupinKucunNumberEnd != null  and params.wupinKucunNumberEnd != '' ">
+                <![CDATA[  and wupin.wupin_kucun_number <= #{params.wupinKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.wupinKucunNumber != null  and params.wupinKucunNumber != '' ">
+                and wupin.wupin_kucun_number = #{params.wupinKucunNumber}
+            </if>
+            <if test="params.wupinDeleteStart != null  and params.wupinDeleteStart != '' ">
+                <![CDATA[  and wupin.wupin_delete >= #{params.wupinDeleteStart}   ]]>
+            </if>
+            <if test="params.wupinDeleteEnd != null  and params.wupinDeleteEnd != '' ">
+                <![CDATA[  and wupin.wupin_delete <= #{params.wupinDeleteEnd}   ]]>
+            </if>
+            <if test="params.wupinDelete != null  and params.wupinDelete != '' ">
+                and wupin.wupin_delete = #{params.wupinDelete}
+            </if>
+            <if test=" params.wupinContent != '' and params.wupinContent != null and params.wupinContent != 'null' ">
+                and wupin.wupin_content like CONCAT('%',#{params.wupinContent},'%')
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
